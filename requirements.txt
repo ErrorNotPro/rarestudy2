@@ -1,0 +1,7 @@
+Flask==2.3.3
+requests==2.31.0
+aiohttp==3.9.1
+pycryptodome==3.19.0
+gunicorn==21.2.0
+urllib3==2.1.0
+cachelib==0.13.0
