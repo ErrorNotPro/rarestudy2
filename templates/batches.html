@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>RareStudy - Batches</title>
+    <link rel="icon" type="image/png" href="/static/rarestudylogo.png">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;outline:none;-webkit-tap-highlight-color:transparent;user-select:none}
+        body,html{height:100%;font-family:Inter,sans-serif;background:#0f172a;color:#e2e8f0;overflow:hidden}
+        
+        .header{position:fixed;top:0;left:0;right:0;height:50px;background:rgba(15,23,42,0.95);backdrop-filter:blur(15px);display:flex;align-items:center;z-index:1400;border-bottom:1px solid rgba(30,41,59,0.5);box-shadow:0 4px 20px rgba(0,0,0,0.3);padding:0 15px}
+        
+        .toggle-menu{cursor:pointer;font-size:22px;background:transparent;border:none;color:#94a3b8;transition:all .2s;padding:12px;border-radius:8px;display:flex;align-items:center;justify-content:center;width:46px;height:46px}
+        .toggle-menu:hover{background:rgba(79,70,229,0.2);color:#6366f1;transform:scale(1.05)}
+        
+        .site-brand{font-weight:700;font-size:18px;color:#6366f1;position:absolute;left:50%;transform:translateX(-50%);letter-spacing:0.3px;background:rgba(79,70,229,0.15);padding:6px 14px;border-radius:10px;border:1px solid rgba(79,70,229,0.3);box-shadow:0 2px 8px rgba(79,70,229,0.2)}
+        
+        .search-section{position:fixed;top:50px;left:0;right:0;z-index:1350;background:rgba(15,23,42,0.95);backdrop-filter:blur(15px);border-bottom:1px solid rgba(30,41,59,0.5);padding:15px 20px}
+        .search-container{width:100%;margin:0 auto;position:relative}
+        .search-box{width:100%;padding:12px 50px 12px 20px;border:2px solid #334155;border-left:4px solid #6366f1;border-radius:25px;font-size:16px;font-weight:500;background:#1e293b !important;color:#e2e8f0 !important;transition:border-color .2s,box-shadow .2s}
+        .search-box:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.2);background:#1e293b !important;color:#e2e8f0 !important}
+        .search-box:active{background:#1e293b !important;color:#e2e8f0 !important}
+        .search-box::placeholder{color:#64748b}
+        .search-box:-webkit-autofill,
+        .search-box:-webkit-autofill:hover,
+        .search-box:-webkit-autofill:focus,
+        .search-box:-webkit-autofill:active{
+            -webkit-box-shadow:0 0 0 30px #1e293b inset !important;
+            -webkit-text-fill-color:#e2e8f0 !important;
+            background-color:#1e293b !important;
+        }
+        .search-btn{position:absolute;right:5px;top:50%;transform:translateY(-50%);background:#6366f1;border:none;border-radius:20px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .2s;color:white;font-size:16px}
+        .search-btn:hover{transform:translateY(-50%) scale(1.1)}
+        
+        .tab-navigation{position:fixed;top:120px;left:0;right:0;z-index:1300;background:transparent;padding:0 20px}
+        .tab-nav{display:flex;gap:15px;height:50px;background:#1e293b;border-radius:15px;box-shadow:0 4px 15px rgba(0,0,0,0.3);overflow:hidden;border:1px solid #334155}
+        .tab-btn{flex:1;height:100%;background:transparent;border:none;font-weight:700;font-size:18px;cursor:pointer;transition:all .2s;color:#64748b;position:relative;display:flex;align-items:center;justify-content:center}
+        .tab-btn.active{color:white;background:#6366f1;border-radius:0;margin:0}
+        .tab-btn:hover:not(.active){background:rgba(99,102,241,0.15);color:#6366f1;border-radius:0;margin:0}
+        
+        .content{position:absolute;top:190px;left:0;right:0;bottom:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:25px;scroll-behavior:smooth}
+        
+        .batches-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:25px;max-width:1400px;margin:0 auto}
+        .batch{background:#1e293b;border-radius:18px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.4);transition:transform .3s ease,box-shadow .3s ease;cursor:pointer;border:1px solid #334155;will-change:transform;border-left:5px solid #6366f1}
+        .batch:hover{transform:translateY(-8px);box-shadow:0 20px 60px rgba(0,0,0,0.6)}
+        
+        .batch-thumbnail{position:relative;width:100%;height:auto;overflow:hidden;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);pointer-events:none}
+        .batch-thumbnail img{width:100%;height:auto;display:block;transition:none;pointer-events:none;-webkit-user-drag:none;-webkit-touch-callout:none}
+        
+        .favorite-btn{position:absolute;top:12px;right:12px;width:36px;height:36px;background:rgba(30,41,59,0.95);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s;z-index:10;font-size:18px;backdrop-filter:blur(10px);border:1px solid #334155;pointer-events:auto}
+        .favorite-btn:hover{background:#334155;transform:scale(1.15)}
+        .favorite-btn.favorited{background:#ef4444;color:white;border-color:#ef4444}
+        
+        .batch-info{padding:10px;background:#1e293b;position:relative;display:flex;align-items:center;justify-content:center;min-height:40px}
+        .batch-name{font-size:17px;font-weight:800;color:#e2e8f0;line-height:1.4;margin:0;text-align:center;letter-spacing:0.3px;word-wrap:break-word;overflow-wrap:break-word}
+        
+        .menu{position:fixed;top:0;left:-280px;width:280px;height:100%;background:linear-gradient(180deg,#1e293b 0%,#0f172a 100%);transition:left .3s ease;z-index:1500;display:flex;flex-direction:column;border-right:1px solid #334155}
+        .menu.open{left:0}
+        
+        .menu-header{padding:25px;color:white;text-align:center;border-bottom:1px solid rgba(51,65,85,0.5);display:flex;align-items:center;justify-content:center;min-height:50px}
+        .menu-brand{font-size:24px;font-weight:800;letter-spacing:1px;color:#6366f1}
+        .menu-close{display:none}
+        
+        .menu-items{padding:25px 0;flex:1}
+        .menu-item{padding:18px 25px;transition:background .2s;border-left:4px solid transparent}
+        .menu-item:hover{background:rgba(99,102,241,0.15);border-left-color:#6366f1}
+        .menu-item a{text-decoration:none;color:#e2e8f0;display:flex;align-items:center;font-weight:600}
+        .menu-item-icon{margin-right:12px;font-size:18px}
+        
+        .menu-footer{padding:20px 25px;border-top:1px solid rgba(51,65,85,0.5);color:#94a3b8;text-align:center;font-size:14px;margin-top:auto}
+        .menu-footer div:first-child{margin-bottom:5px}
+        
+        .overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.8);display:none;z-index:1400;backdrop-filter:blur(3px)}
+        .overlay.show{display:block}
+        
+        .empty-state{text-align:center;padding:80px 20px;background:#1e293b;border-radius:20px;margin:20px auto;max-width:500px;box-shadow:0 8px 25px rgba(0,0,0,0.4);border:1px solid #334155}
+        .empty-icon{font-size:64px;margin-bottom:20px;opacity:0.8}
+        .empty-title{font-size:24px;font-weight:700;margin-bottom:15px;color:#e2e8f0}
+        .empty-desc{font-size:16px;color:#94a3b8;max-width:400px;margin:0 auto}
+        
+        .no-results{text-align:center;padding:15px 20px;background:#1e293b;border-radius:12px;margin:0 auto 25px auto;max-width:300px;box-shadow:0 4px 15px rgba(0,0,0,0.3);border:1px solid #dc2626}
+        .no-results-title{font-size:16px;font-weight:700;color:#dc2626;margin:0}
+        
+        .loading-spinner{display:flex;justify-content:center;align-items:center;padding:40px 20px}
+        .spinner{width:40px;height:40px;border:4px solid rgba(99,102,241,0.2);border-top:4px solid #6366f1;border-radius:50%;animation:spin 1s linear infinite}
+        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        
+        .content::-webkit-scrollbar{width:6px}
+        .content::-webkit-scrollbar-track{background:rgba(30,41,59,0.3)}
+        .content::-webkit-scrollbar-thumb{background:rgba(99,102,241,0.5);border-radius:3px}
+        .content::-webkit-scrollbar-thumb:hover{background:rgba(99,102,241,0.7)}
+        
+        .telegram-popup{position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:2000;backdrop-filter:blur(8px)}
+        .popup-content{background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border-radius:20px;padding:40px 30px;max-width:400px;width:90%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.8);border:2px solid #6366f1;text-align:center;animation:popupSlide 0.4s ease-out}
+        @keyframes popupSlide{0%{transform:scale(0.8);opacity:0}100%{transform:scale(1);opacity:1}}
+        .popup-close{position:absolute;top:15px;right:15px;width:35px;height:35px;background:rgba(51,65,85,0.6);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:#94a3b8;transition:all .2s;backdrop-filter:blur(10px)}
+        .popup-close:hover{background:#334155;color:#e2e8f0;transform:scale(1.1)}
+        .popup-icon{font-size:48px;margin-bottom:20px}
+        .popup-title{font-size:24px;font-weight:800;color:#e2e8f0;margin-bottom:12px;letter-spacing:0.5px}
+        .popup-desc{font-size:16px;color:#94a3b8;margin-bottom:30px;line-height:1.5}
+        .telegram-btn{background:linear-gradient(135deg,#6366f1 0%,#4f46e5 100%);border:none;border-radius:15px;padding:15px 30px;font-size:16px;font-weight:700;color:white;cursor:pointer;transition:all .3s;text-decoration:none;display:inline-block;box-shadow:0 8px 25px rgba(99,102,241,0.3);letter-spacing:0.5px;-webkit-tap-highlight-color:transparent;tap-highlight-color:transparent}
+        .telegram-btn:hover{transform:translateY(-3px);box-shadow:0 12px 35px rgba(99,102,241,0.4);background:linear-gradient(135deg,#4f46e5 0%,#6366f1 100%)}
+        .telegram-btn:active{transform:translateY(-1px)}
+        .telegram-btn:focus{outline:none}
+        .telegram-btn:visited{color:white}
+        
+        @media (max-width:768px){
+            .batches-grid{grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+            .site-brand{font-size:16px;padding:5px 12px}
+            .tab-btn{font-size:16px}
+            .tab-nav{gap:10px}
+        }
+        
+        @media (max-width:480px){
+            .batches-grid{grid-template-columns:1fr}
+            .site-brand{font-size:14px;padding:4px 10px}
+            .menu{width:240px;left:-240px}
+            .toggle-menu{font-size:20px;width:44px;height:44px}
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <button class="toggle-menu" onclick="toggleMenu()">☰</button>
+    <div class="site-brand">rarestudy.site</div>
+</div>
+
+<div class="search-section">
+    <div class="search-container">
+        <input type="text" class="search-box" placeholder="Search batches..." id="searchInput">
+        <button class="search-btn" onclick="performSearch()">🔍</button>
+    </div>
+</div>
+
+<div class="tab-navigation">
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('total',this)">Total Batches</button>
+        <button class="tab-btn" onclick="switchTab('favourite',this)">Favourites</button>
+    </div>
+</div>
+
+<div class="content" id="content">
+    <div id="no-results" class="no-results" style="display:none;">
+        <div class="no-results-title">No batches found</div>
+    </div>
+
+    <div id="total-batches" class="batches-grid"></div>
+    <div id="favourite-batches" class="batches-grid" style="display:none;"></div>
+    
+    <div id="loading-spinner" class="loading-spinner" style="display:none;">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="empty-favourites" class="empty-state" style="display:none;">
+        <div class="empty-icon">💖</div>
+        <div class="empty-title">No Favourite Batches</div>
+        <div class="empty-desc">Add batches to your favourites by clicking the heart icon</div>
+    </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+<div class="menu" id="menu">
+    <div class="menu-header">
+        <div class="menu-brand">rarestudy.site</div>
+    </div>
+    <div class="menu-items">
+        <div class="menu-item">
+            <a href="https://t.me/rarestudy" target="_blank">
+                <span class="menu-item-icon">📢</span>Join Telegram Channel
+            </a>
+        </div>
+        <div class="menu-item">
+            <a href="https://t.me/anonymousrajput" target="_blank">
+                <span class="menu-item-icon">💬</span>Get Help & Support
+            </a>
+        </div>
+    </div>
+    <div class="menu-footer">
+        <div>Made with ❤️ in India</div>
+        <div>© 2025 RareStudy</div>
+    </div>
+</div>
+
+<div class="telegram-popup" id="telegramPopup">
+    <div class="popup-content">
+        <button class="popup-close" onclick="closeTelegramPopup()">✕</button>
+        <div class="popup-icon">📢</div>
+        <div class="popup-title">Join Our Community!</div>
+        <div class="popup-desc">Stay updated with latest study materials and get instant notifications</div>
+        <button class="telegram-btn" onclick="joinTelegramChannel()">Join Telegram Channel</button>
+    </div>
+</div>
+
+<script>
+const menu=document.getElementById('menu'),overlay=document.getElementById('overlay'),searchInput=document.getElementById('searchInput'),content=document.getElementById('content');
+let currentTab='total',favouriteBatches=[],favouritesLoaded=false,isLoading=false,currentPage=0,hasMore=true,searchTimeout,currentSearchTerm='';
+
+function closeTelegramPopup(){
+    document.getElementById('telegramPopup').style.display='none';
+}
+
+function joinTelegramChannel(){
+    closeTelegramPopup();
+    window.open('https://t.me/rarestudy', '_blank');
+}
+
+function toggleMenu(){
+    menu.classList.toggle('open');
+    overlay.classList.toggle('show');
+}
+
+function createBatchElement(batch){
+    return `<div class="batch" data-batch-id="${batch._id}" onclick="location.href='/data/${batch.encoded_id}'">
+        <div class="batch-thumbnail">
+            <img src="${batch.previewImage}" alt="${batch.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwZjE3MmEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMxZTI5M2IiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2cpIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSIxNiIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzk0YTNiOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='">
+            <button class="favorite-btn" onclick="toggleFavourite('${batch._id}', event)">
+                <span class="heart-icon">${favouriteBatches.includes(batch._id)?'❤️':'🤍'}</span>
+            </button>
+        </div>
+        <div class="batch-info">
+            <div class="batch-name">${batch.name}</div>
+        </div>
+    </div>`;
+}
+
+function loadBatches(page=0,search=''){
+    if(isLoading)return;
+    isLoading=true;
+    
+    if(page===0){
+        document.getElementById('total-batches').innerHTML='';
+        document.getElementById('no-results').style.display='none';
+    }
+    
+    document.getElementById('loading-spinner').style.display='flex';
+    
+    const params=new URLSearchParams({page,limit:20});
+    if(search)params.append('search',search);
+    
+    fetch(`/api/batches?${params}`)
+    .then(response=>response.json())
+    .then(data=>{
+        if(data.success){
+            const container=document.getElementById('total-batches');
+            
+            if(data.batches.length===0){
+                if(page===0){
+                    if(search){
+                        document.getElementById('no-results').style.display='block';
+                    }else{
+                        container.innerHTML='<div class="empty-state"><div class="empty-icon">📚</div><div class="empty-title">No Batches Found</div><div class="empty-desc">No study batches available at the moment</div></div>';
+                    }
+                }
+                hasMore=false;
+            }else{
+                data.batches.forEach(batch=>{
+                    container.innerHTML+=createBatchElement(batch);
+                });
+                hasMore=data.batches.length===20;
+                currentPage=page;
+            }
+        }
+        isLoading=false;
+        document.getElementById('loading-spinner').style.display='none';
+    })
+    .catch(error=>{
+        console.error('Error loading batches:',error);
+        isLoading=false;
+        document.getElementById('loading-spinner').style.display='none';
+        if(page===0){
+            document.getElementById('total-batches').innerHTML='<div class="empty-state"><div class="empty-icon">❌</div><div class="empty-title">Error Loading Batches</div><div class="empty-desc">Please try again later</div></div>';
+        }
+    });
+}
+
+function performSearch(){
+    const searchTerm=searchInput.value.trim().toLowerCase();
+    currentSearchTerm=searchTerm;
+    currentPage=0;
+    hasMore=true;
+    
+    clearTimeout(searchTimeout);
+    searchTimeout=setTimeout(()=>{
+        loadBatches(0,searchTerm);
+    },300);
+}
+
+searchInput.addEventListener('keypress',e=>{
+    if(e.key==='Enter')performSearch();
+});
+
+searchInput.addEventListener('input',performSearch);
+
+content.addEventListener('scroll',()=>{
+    if(currentTab!=='total'||!hasMore||isLoading)return;
+    
+    const scrollTop=content.scrollTop;
+    const scrollHeight=content.scrollHeight;
+    const clientHeight=content.clientHeight;
+    
+    if(scrollTop+clientHeight>=scrollHeight-100){
+        loadBatches(currentPage+1,currentSearchTerm);
+    }
+});
+
+function switchTab(tab,btn){
+    currentTab=tab;
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    searchInput.value='';
+    currentSearchTerm='';
+    document.getElementById('no-results').style.display='none';
+    
+    if(tab==='total'){
+        document.getElementById('total-batches').style.display='grid';
+        document.getElementById('favourite-batches').style.display='none';
+        document.getElementById('loading-spinner').style.display='none';
+        document.getElementById('empty-favourites').style.display='none';
+        
+        if(document.getElementById('total-batches').innerHTML===''){
+            currentPage=0;
+            hasMore=true;
+            loadBatches();
+        }
+    }else if(tab==='favourite'){
+        document.getElementById('total-batches').style.display='none';
+        document.getElementById('favourite-batches').style.display='none';
+        document.getElementById('empty-favourites').style.display='none';
+        
+        // Always show loading spinner when switching to favourites
+        document.getElementById('loading-spinner').style.display='flex';
+        
+        if(!favouritesLoaded){
+            loadFavourites();
+        }else{
+            // Use cached favourites data
+            renderFavourites();
+        }
+    }
+}
+
+function renderFavourites(){
+    const container=document.getElementById('favourite-batches');
+    const emptyState=document.getElementById('empty-favourites');
+    const loading=document.getElementById('loading-spinner');
+    
+    if(favouriteBatches.length===0){
+        loading.style.display='none';
+        emptyState.style.display='block';
+        container.style.display='none';
+    }else{
+        emptyState.style.display='none';
+        
+        // Check if we already have rendered favourites to avoid re-fetching
+        if(container.innerHTML.trim() === ''){
+            // Keep loading spinner visible while fetching
+            loading.style.display='flex';
+            container.style.display='none';
+            
+            fetch('/api/favourite-batches',{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({batch_ids:favouriteBatches})
+            })
+            .then(response=>response.json())
+            .then(data=>{
+                loading.style.display='none';
+                if(data.success){
+                    container.innerHTML='';
+                    data.batches.forEach(batch=>{
+                        container.innerHTML+=createBatchElement(batch);
+                    });
+                    container.style.display='grid';
+                }
+            })
+            .catch(error=>{
+                console.error('Error loading favourite batches:',error);
+                loading.style.display='none';
+                emptyState.style.display='block';
+                container.style.display='none';
+            });
+        }else{
+            // Already have cached data, show immediately
+            loading.style.display='none';
+            container.style.display='grid';
+        }
+    }
+}
+
+function loadFavourites(){
+    fetch('/api/get-favourites')
+    .then(response=>response.json())
+    .then(data=>{
+        if(data.success){
+            favouriteBatches=data.favourites;
+            favouritesLoaded=true;
+            if(currentTab==='favourite'){
+                renderFavourites();
+            }
+        }
+    })
+    .catch(error=>{
+        console.error('Error loading favourites:',error);
+        document.getElementById('loading-spinner').style.display='none';
+        if(currentTab==='favourite'){
+            document.getElementById('empty-favourites').style.display='block';
+        }
+    });
+}
+
+function toggleFavourite(batchId,event){
+    event.stopPropagation();
+    
+    const btn=event.currentTarget;
+    const heartIcon=btn.querySelector('.heart-icon');
+    
+    btn.style.transform='scale(0.8)';
+    setTimeout(()=>{btn.style.transform='';},150);
+    
+    fetch('/api/toggle-favourite',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({batch_id:batchId})
+    })
+    .then(response=>response.json())
+    .then(data=>{
+        if(data.success){
+            if(data.action==='added'){
+                favouriteBatches.push(batchId);
+                heartIcon.textContent='❤️';
+                btn.classList.add('favorited');
+            }else{
+                favouriteBatches=favouriteBatches.filter(id=>id!==batchId);
+                heartIcon.textContent='🤍';
+                btn.classList.remove('favorited');
+            }
+            
+            // Clear the favourite batches container to force re-render with updated data
+            if(currentTab==='favourite'){
+                document.getElementById('favourite-batches').innerHTML='';
+                renderFavourites();
+            }
+        }
+    })
+    .catch(error=>{
+        console.error('Error toggling favourite:',error);
+        btn.style.transform='';
+    });
+}
+
+let startX;
+document.addEventListener('touchstart',e=>{startX=e.touches[0].clientX;});
+document.addEventListener('touchmove',e=>{
+    const moveX=e.touches[0].clientX;
+    const deltaX=moveX-startX;
+    
+    if(Math.abs(deltaX)>100){
+        if(deltaX>0&&startX<50){
+            menu.classList.add('open');
+            overlay.classList.add('show');
+        }else if(deltaX<0&&menu.classList.contains('open')){
+            menu.classList.remove('open');
+            overlay.classList.remove('show');
+        }
+    }
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded',()=>{
+    loadFavourites();
+    loadBatches();
+});
+
+// Show telegram popup on page load
+setTimeout(() => {
+    document.getElementById('telegramPopup').style.display = 'flex';
+}, 1000);
+</script>
+</body>
+</html>

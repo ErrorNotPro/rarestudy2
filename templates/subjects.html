@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Today's Class and Schedule</title>
+    <style>
+        /* Reset and base styles */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background: white;
+            color: #333;
+            overflow: hidden;
+        }
+
+        /* Fixed header container with toggle and back button */
+        .header-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px; 
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-sizing: border-box;
+            z-index: 1300;
+            user-select: none;
+            border-bottom: 1px solid #ccc;
+        }
+
+        /* Toggle menu button (hamburger) */
+        .toggle-menu {
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin-right: 20px;
+            color: #333;
+            user-select: none;
+            transition: opacity 0.3s ease;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+        }
+        .toggle-menu.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Back to Batches container */
+        .back-container {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: black;
+            user-select: none;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .back-arrow {
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 8px;
+            line-height: 1;
+            color: black;
+            user-select: none;
+        }
+        .back-text {
+            color: black;
+            font-weight: bold;
+            user-select: none;
+        }
+
+        /* Main content scrollable area below fixed header */
+        .content-scroll {
+            position: absolute;
+            top: 60px; 
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 20px;
+            box-sizing: border-box;
+            background: white;
+        }
+
+        /* Main page title */
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        /* Wrapper box for Today's Class */
+        .today-class-box {
+            max-width: 960px;
+            margin: 0 auto 20px auto; /* Reduced bottom margin */
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Horizontal scroll container for today's schedule */
+        .today-schedule-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            scroll-behavior: smooth;
+            padding-bottom: 10px;
+        }
+        .today-schedule-container::-webkit-scrollbar {
+            height: 8px;
+            background: transparent;
+        }
+        .today-schedule-container::-webkit-scrollbar-thumb {
+            background-color: transparent;
+        }
+        .today-schedule-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* Schedule cards styling */
+        .schedule-card {
+            flex: 0 0 auto;
+            width: 220px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+        .schedule-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        /* Video thumbnail showing full image */
+        .schedule-card.video img {
+            width: 100%;
+            height: 140px;
+            object-fit: contain; 
+            background: transparent; 
+            border-bottom: 1px solid #ddd;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* Start time styling for video cards */
+        .start-time {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: black;
+            font-size: 12px;
+            font-weight: bold;
+            user-select: none;
+            justify-content: flex-end;
+        }
+
+        /* Clock icon using CSS */
+        .clock-icon {
+            width: 12px;
+            height: 12px;
+            border: 2px solid black;
+            border-radius: 50%;
+            position: relative;
+            display: inline-block;
+        }
+        .clock-icon::before {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 50%;
+            width: 1px;
+            height: 3px;
+            background: black;
+            transform: translateX(-50%);
+        }
+        .clock-icon::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            width: 1px;
+            height: 2px;
+            background: black;
+            transform: translateX(-50%);
+        }
+
+        /* Schedule card content */
+        .schedule-content {
+            padding: 8px 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .schedule-card.video .topic {
+            display: none;
+        }
+        .schedule-card.video .subject {
+            font-size: 18px;
+            font-weight: 700;
+            color: black;
+        }
+        .schedule-card.note .topic {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 6px;
+            color: black;
+        }
+        .schedule-card.note .subject {
+            font-size: 14px;
+            color: black;
+            font-weight: bold;
+            margin-top: 6px;
+        }
+
+        /* Subject list styling: each subject in a box */
+        ul.subject-list {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0;
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        ul.subject-list li {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-size: 18px;
+            font-weight: 600;
+            transition: box-shadow 0.3s ease;
+        }
+        ul.subject-list li:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        ul.subject-list li a {
+            text-decoration: none;
+            color: black;
+            font-weight: bold;
+            display: block;
+        }
+        ul.subject-list li a:hover {
+            color: black;
+            text-decoration: underline;
+        }
+
+        /* Menu styles */
+        .menu {
+            position: fixed;
+            top: 0; 
+            left: -300px;
+            width: 250px;
+            height: 100%;
+            background: #fff;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+            transition: left 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 1400;
+        }
+        .menu-header {
+            padding: 20px;
+            background: #4CAF50;
+            color: white;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .menu-item {
+            padding: 15px;
+            text-align: left;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        .menu-item a {
+            text-decoration: none;
+            color: #000;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1300; 
+        }
+        
+        .menu-bottom {
+            padding-bottom: 10px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Fixed header with toggle and back -->
+<div class="header-fixed" role="banner">
+
+    <!-- Toggle menu button -->
+    <button class="toggle-menu" aria-label="Toggle menu">&#9776;</button>
+
+    <!-- Back to Batches link -->
+    <a href="{{ url_for('batches') }}" class="back-container" aria-label="Back to Batches">
+        <span class="back-arrow">&#8592;</span>
+        <span class="back-text">Back To Batches</span>
+    </a>
+
+</div>
+
+<!-- Scrollable content area below fixed header -->
+<div class="content-scroll" role="main" tabindex="0">
+
+    <!-- Main Title -->
+    <h1>Today's Class</h1>
+
+    <!-- Wrapper box for today's schedule -->
+    <div class="today-class-box">
+        <!-- Today's Schedule -->
+        <div class="today-schedule-container" id="todaySchedule">
+            {% for item in today_schedule %}
+                {% if item.type == 'video' %}
+                    <a href="{{ item.videoUrl }}" target="_blank" class="schedule-card video" rel="noopener noreferrer">
+                        <img src="{{ item.thumbnail if item.thumbnail else url_for('static', filename='rarestudy.jpg') }}" alt="Thumbnail for {{ item.subject_name }}" draggable="false" />
+                        <div class="schedule-content">
+                            {% if item.startTime %}
+                                <div class="start-time">
+                                    <span class="clock-icon"></span>
+                                    <span>{{ item.startTime }}</span>
+                                </div>
+                            {% endif %}
+                            <div class="subject">{{ item.subject_name }}</div>
+                        </div>
+                    </a>
+                {% elif item.type == 'note' %}
+                    <a href="{{ item.url }}" target="_blank" class="schedule-card note" rel="noopener noreferrer">
+                        <div class="schedule-content" style="padding-top: 20px; padding-bottom: 20px;">
+                            <div class="topic">Topic - {{ item.name }}</div>
+                            <div class="subject">{{ item.subject_name }}</div>
+                        </div>
+                    </a>
+                {% endif %}
+            {% else %}
+                <p style="font-style: italic; color: #555;">No classes or notes scheduled for today.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- List of subjects -->
+    <ul class="subject-list">
+        {% for subject in subjects %}
+            <li>
+                <a href="{{ url_for('chapters', encoded_params=encode_params(batch_id, subject._id)) }}">
+                    {{ subject['subject'] }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay"></div>
+
+<!-- Menu -->
+<div class="menu" id="menu" aria-hidden="true">
+    <div>
+        <div class="menu-header">Menu</div>
+        <div class="menu-item"><a href="https://t.me/rarestudy" target="_blank" rel="noopener noreferrer">Join Telegram Channel</a></div>
+        <div class="menu-item"><a href="https://t.me/anonymousrajput" target="_blank" rel="noopener noreferrer">Help</a></div>
+    </div>
+
+    <div>
+        <div class="menu-bottom">Made with ❤️ in India</div>
+    </div>
+</div>
+
+<script>
+    // Disable right-click
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // Disable F12, Ctrl+I, Ctrl+U
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'F12' || (e.ctrlKey && (e.key === 'I' || e.key === 'U'))) {
+            e.preventDefault();
+        }
+    });
+
+    const menu = document.getElementById('menu');
+    const overlay = document.getElementById('overlay');
+    const toggleMenuBtn = document.querySelector('.toggle-menu');
+    const backContainer = document.querySelector('.back-container');
+
+    // Toggle menu open/close with hiding back button
+    function toggleMenu() {
+        const isOpen = menu.style.left === '0px';
+        if (isOpen) {
+            menu.style.left = '-300px';
+            overlay.style.display = 'none';
+            toggleMenuBtn.classList.remove('hidden');
+            backContainer.classList.remove('hidden'); 
+            menu.setAttribute('aria-hidden', 'true');
+        } else {
+            menu.style.left = '0px';
+            overlay.style.display = 'block';
+            toggleMenuBtn.classList.add('hidden');
+            backContainer.classList.add('hidden'); 
+            menu.setAttribute('aria-hidden', 'false');
+        }
+    }
+
+    toggleMenuBtn.onclick = toggleMenu;
+
+    // Touch gestures for menu swipe
+    let startX;
+    document.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+    });
+
+    document.addEventListener('touchmove', (e) => {
+        if (e.target.closest('#todaySchedule')) {
+            return;
+        }
+        const moveX = e.touches[0].clientX;
+        if (moveX - startX > 100) {
+            menu.style.left = '0px';
+            overlay.style.display = 'block';
+            toggleMenuBtn.classList.add('hidden');
+            backContainer.classList.add('hidden');
+            menu.setAttribute('aria-hidden', 'false');
+        } else if (startX - moveX > 100) {
+            menu.style.left = '-300px';
+            overlay.style.display = 'none';
+            toggleMenuBtn.classList.remove('hidden');
+            backContainer.classList.remove('hidden');
+            menu.setAttribute('aria-hidden', 'true');
+        }
+    });
+
+    overlay.addEventListener('click', toggleMenu);
+</script>
+
+</body>
+</html>

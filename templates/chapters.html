@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Chapters</title>   
+<style>
+  /* Body styling for a vibrant background */
+  body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #fceabb 0%, #f8b500 100%);
+    margin: 0;
+    padding: 20px;
+  }
+
+  /* Title styling: big, bold, colorful box */
+  h1 {
+    font-size: 50px;
+    font-weight: bold;
+    text-align: center;
+    padding: 20px;
+    background-color: #ff7f50; /* Coral color */
+    color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    margin-bottom: 30px;
+    border: 5px solid #ff6347; /* Tomato border */
+  }
+
+  /* Back link styling with arrow, positioned above list */
+  .back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #fff;
+    background-color: #4CAF50; /* Green background */
+    padding: 10px 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: background-color 0.3s;
+  }
+
+  /* Hover effect for back link */
+  .back-link:hover {
+    background-color: #388e3c;
+  }
+
+  /* List styles */
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  /* Each chapter item styling */
+  li {
+    background: #fff;
+    margin: 15px 0;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  /* Hover effect for chapters */
+  li:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+
+  /* Chapter link styling */
+  a {
+    text-decoration: none;
+    font-size: 24px;
+    font-weight: bold;
+    color: #ff69b4; /* Hot pink color */
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  /* Hover effect for chapter links */
+  a:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+
+  /* Responsive adjustments for smaller screens */
+  @media(max-width: 600px){
+    h1 { font-size: 35px; }
+    a { font-size: 20px; padding: 8px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Back to Subjects link with arrow -->
+<a class="back-link" href="{{ url_for('subjects', encoded_params=encode_params(batch_id)) }}">← Back to Subjects</a>
+
+<!-- Main Title -->
+<h1>CHAPTERS</h1>
+
+<!-- List of chapters -->
+<ul>
+{% for chapter in chapters %}
+  <li>
+    <a href="{{ url_for('section_content', encoded_params=encode_params(batch_id, subject_id, chapter['_id']), section='videos') }}">
+      {{ chapter['name'] }}
+    </a>
+  </li>
+{% endfor %}
+</ul>
+
+</body>
+</html>

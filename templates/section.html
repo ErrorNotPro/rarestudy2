@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>{{ sections[section] }}</title>
+<style>
+  body { 
+    font-family: Arial, sans-serif; 
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    margin: 0; padding: 0; 
+    color: #333;
+  }
+
+  /* Fixed back button */
+  .back-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+  }
+  .back-btn {
+    font-size: 1.2em; font-weight: bold; background: #fff; padding: 8px 12px; border-radius: 50px; box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+    display: flex; align-items: center; text-decoration: none; color: #333; transition: background 0.3s;
+  }
+  .back-btn:hover { background: #ffe0b2; }
+  .arrow-left { font-size: 1.5em; margin-right: 8px; }
+
+  /* Main container with padding for fixed button */
+  .main-container {
+    padding-top: 70px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  /* Section switch buttons container */
+  .section-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+  }
+
+  /* Style for section buttons - large and attractive */
+  .section-button {
+    margin: 10px;
+    padding: 20px 40px;
+    font-size: 2em; /* large font size */
+    border-radius: 30px;
+    background: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: all 0.3s;
+  }
+  /* Hover effect for buttons */
+  .section-button:hover { 
+    background: #ff7043; 
+    color: #fff; 
+    transform: scale(1.05);
+  }
+  /* Active section button style */
+  .active { 
+    background: #ff7043; 
+    color: #fff; 
+  }
+
+  /* Content styles */
+  .content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    max-height: calc(100vh - 180px);
+    overflow-y: auto;
+  }
+
+  /* Item box styles */
+  .item-box {
+    background: #fff; 
+    border-radius: 15px; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    width: 100%; 
+    max-width: 900px; 
+    padding: 20px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center;
+  }
+
+  /* Thumbnails for videos */
+  .thumbnail {
+    width: 100%; 
+    height: auto; 
+    border-radius: 10px; 
+    max-height: 600px; 
+    object-fit: cover;
+    margin-bottom: 10px;
+  }
+
+  /* Item name below videos */
+  .item-name {
+    font-weight: bold; 
+    font-size: 1.4em; 
+    text-align: center; 
+    margin-top: 8px; 
+    color: #333;
+  }
+
+  /* Style for note links */
+  .note-link {
+    font-size: 1.3em; 
+    color: #4CAF50; 
+    text-decoration: none; 
+    font-weight: bold;
+  }
+  .note-link:hover { text-decoration: underline; }
+
+  /* Responsive adjustments */
+  @media(max-width: 600px) {
+    .section-button { font-size: 1.5em; padding: 15px 30px; }
+    .item-name { font-size: 1.2em; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Back button -->
+<div class="back-container">
+  <a href="{{ url_for('chapters', encoded_params=encode_params(batch_id, subject_id)) }}" class="back-btn">
+    <span class="arrow-left">&#8592;</span> Back to Chapters
+  </a>
+</div>
+
+<div class="main-container">
+
+  <!-- Section switch buttons -->
+  <div class="section-buttons">
+    {% set sections = {'videos': 'Videos', 'notes': 'Notes', 'DppNotes': 'Dpp Notes', 'DppVideos': 'Dpp Videos'} %}
+    {% for key, label in sections.items() %}
+      <a href="{{ url_for('section_content', encoded_params=encode_params(batch_id, subject_id, chapter_id), section=key) }}"
+         class="section-button {% if section == key %}active{% endif %}">
+        {{ label }}
+      </a>
+    {% endfor %}
+  </div>
+
+  <!-- No section title, only content -->
+  <!-- The content for the current section -->
+  <div class="content">
+    {% for item in data %}
+      <div class="item-box">
+        {% if item.type == 'video' %}
+          <a href="{{ item.videoUrl }}" target="_blank">
+            <img src="{{ item.thumbnail }}" alt="{{ item.name }}" class="thumbnail" />
+          </a>
+          <div class="item-name">{{ item.name }}</div>
+        {% elif item.type == 'note' %}
+          <a href="{{ item.url }}" target="_blank" class="note-link">{{ item.name }}</a>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+</body>
+</html>
